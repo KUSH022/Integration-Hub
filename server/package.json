@@ -7,16 +7,16 @@
     "node": ">=20.11"
   },
   "scripts": {
-    "dev": "tsx watch --env-file=.env src/index.ts",
+    "dev": "tsx watch --env-file=.env src/localServer.ts",
     "build": "tsc -p tsconfig.build.json",
-    "start": "node dist/src/index.js",
+    "start": "node dist/src/localServer.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "db:migrate": "tsx --env-file=.env scripts/migrate.ts",
     "db:migrate:prod": "node dist/scripts/migrate.js",
     "test": "vitest run",
     "test:watch": "vitest",
     "openapi": "tsx scripts/export-openapi.ts",
-    "start:local": "node --env-file=.env dist/src/index.js"
+    "start:local": "node --env-file=.env dist/src/localServer.js"
   },
   "dependencies": {
     "express": "^4.21.2",

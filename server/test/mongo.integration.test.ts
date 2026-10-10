@@ -7,7 +7,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { MongoClient } from 'mongodb';
-import { createApp } from '../src/app.js';
+import { createApp } from '../src/createApp.js';
 import { policyFromConfig, type AppDeps } from '../src/context.js';
 import { createHttpClient } from '../src/core/httpClient.js';
 import { TEMPLATES } from '../src/core/templates.js';

@@ -4,7 +4,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import request from 'supertest';
-import { createApp } from '../src/app.js';
+import { createApp } from '../src/createApp.js';
 import { policyFromConfig } from '../src/context.js';
 import { createHttpClient } from '../src/core/httpClient.js';
 import { routes } from '../src/http/registry.js';

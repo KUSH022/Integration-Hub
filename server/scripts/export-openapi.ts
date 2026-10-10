@@ -4,7 +4,7 @@
  */
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { buildOpenApi } from '../src/http/openapi.js';
-import '../src/app.js'; // registers every implemented route
+import '../src/createApp.js'; // registers every implemented route
 
 mkdirSync('../docs', { recursive: true });
 writeFileSync('../docs/openapi.json', JSON.stringify(buildOpenApi(), null, 2));

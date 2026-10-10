@@ -10,7 +10,7 @@ The Hub ZIP contains one application with two Vercel services:
 - **API:** Express API, served under `/api`.
 - **Database:** MongoDB Atlas, in a database named `kp_integration_hub`.
 
-The supplied `vercel.json` routes `/api/...` requests to the API service and other requests to the web service. It explicitly points the API service to `server/api/index.ts`, the Hub's Vercel request handler. Vercel currently documents Services as a beta feature available on all plans. The Vercel project must use the **Services** framework preset for this configuration to take effect. [Vercel Services guide](https://vercel.com/docs/services)
+The supplied `vercel.json` routes `/api/...` requests to the API service and other requests to the web service. It points the API service to `server/src/app.mts`, an ES-module Express entrypoint that forwards requests to the Hub's existing API handler. Vercel currently documents Services as a beta feature available on all plans. The Vercel project must use the **Services** framework preset for this configuration to take effect. [Vercel Services guide](https://vercel.com/docs/services)
 
 ## Before deploying
 
@@ -178,7 +178,7 @@ The Employee template follows the same one-record `records` array pattern. Its s
 | Symptom | What to check |
 | --- | --- |
 | Vercel deploys only the web app or says no matching framework | Confirm **Framework Preset = Services**, project root is the repository root, and the root `vercel.json` was included. |
-| `/` loads but `/api/health` fails | Check the `server` service build and Vercel runtime logs. If the log mentions `Cannot use import statement outside a module` or `/var/task/src/app.js`, confirm the deployed `vercel.json` includes `"entrypoint": "api/index.ts"` for the server service, then redeploy the latest code. Also confirm `MONGODB_URI` and all required secrets exist in the Production environment. |
+| `/` loads but `/api/health` fails | Check the `server` service build and Vercel runtime logs. If the log mentions `Cannot use import statement outside a module` or `/var/task/src/app.js`, confirm the deployed `vercel.json` includes `"entrypoint": "src/app.mts"` for the server service and that `server/src/app.mts` is present, then redeploy the latest code. Also confirm `MONGODB_URI` and all required secrets exist in the Production environment. |
 | `/api/ready` says database unavailable | Verify Atlas cluster is running, the URI/password is correct, the Hub database user has `readWrite` on `kp_integration_hub`, and Atlas Network Access permits Vercel. |
 | Browser requests show `CORS_REJECTED` | Set `CORS_ORIGINS` to the exact Hub URL including `https://` and without a trailing slash, then redeploy. |
 | First admin login fails | Confirm `BOOTSTRAP_ADMIN_EMAIL` and `BOOTSTRAP_ADMIN_PASSWORD` were set before the first request and that the users collection was empty. Check server logs for bootstrap errors. |

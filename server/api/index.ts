@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
-import { createApp } from '../src/app.js';
+import { createApp } from '../src/createApp.js';
 import { loadConfig } from '../src/config/env.js';
 import { policyFromConfig, type AppDeps } from '../src/context.js';
 import { createHttpClient } from '../src/core/httpClient.js';

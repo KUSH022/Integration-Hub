@@ -10,7 +10,7 @@ The Hub ZIP contains one application with two Vercel services:
 - **API:** Express API, served under `/api`.
 - **Database:** MongoDB Atlas, in a database named `kp_integration_hub`.
 
-The supplied `vercel.json` routes `/api/...` requests to the API service and other requests to the web service. Vercel currently documents Services as a beta feature available on all plans. The Vercel project must use the **Services** framework preset for this configuration to take effect. [Vercel Services guide](https://vercel.com/docs/services)
+The supplied `vercel.json` routes `/api/...` requests to the API service and other requests to the web service. It explicitly points the API service to `server/api/index.ts`, the Hub's Vercel request handler. Vercel currently documents Services as a beta feature available on all plans. The Vercel project must use the **Services** framework preset for this configuration to take effect. [Vercel Services guide](https://vercel.com/docs/services)
 
 ## Before deploying
 
@@ -120,14 +120,26 @@ The Hub warns and rejects browser write requests when `CORS_ORIGINS` is empty or
 
 ## Step 7: Add the production WFM connection in the Hub
 
-1. Sign in to WFM and request a bearer token using a WFM **Administrator** account. The inbound location and employee routes require this role.
-2. In the Hub, open **Connections → Create connection**.
-3. Enter a name such as `KP WFM Production`, choose the WFM/application type, and set the base URL to the WFM origin only, for example `https://your-wfm.vercel.app` (no `/api` suffix).
-4. Choose **Bearer** authentication and enter the WFM Administrator token as the secret. Do not put `Bearer ` in front of the token unless the Hub form explicitly asks for a full header value.
-5. Set the health-check path to `/api/health` with expected status `200`. The WFM health route is public and confirms network reachability; the protected integration operation still checks the saved token.
-6. Save, test the connection, and activate it after the test succeeds.
+1. Use the WFM demo Administrator account to request a bearer token:
+   - Email: `admin@kpwfm.com`
+   - Password: `Admin123`
+   - These are the demo credentials seeded by the WFM application. They work only if the WFM database has its demo account and the credentials have not been changed.
+2. You do not need to sign in to Vercel again to get this token. Open **PowerShell on your computer** and run the following, replacing the example URL with your deployed WFM URL:
 
-WFM JWT tokens expire after 12 hours. If a connection test or integration later returns `401`, obtain a fresh token from WFM and update the Hub connection's saved credential. A longer-lived service credential is not currently implemented in the WFM code.
+   ```powershell
+   $wfm = 'https://your-wfm.vercel.app'
+   $login = Invoke-RestMethod -Method Post -Uri "$wfm/api/auth/login" -ContentType 'application/json' -Body '{"email":"admin@kpwfm.com","password":"Admin123"}'
+   $login.token
+   ```
+
+   PowerShell prints the token. Copy the printed token value. If the login request fails, verify the WFM URL and that the WFM demo Administrator account is still available.
+3. In the Hub, sign in with the Hub administrator account you configured in Step 5. Open **Connections**, select the WFM connection, and choose **Edit** (or create the connection if you have not added it yet).
+4. Enter a name such as `KP WFM Production`, choose the WFM/application type, and set the base URL to the WFM origin only, for example `https://your-wfm.vercel.app` (no `/api` suffix).
+5. Choose **Bearer** authentication and paste the token into the credential/secret field. Paste only the token; do not add `Bearer ` unless the Hub form explicitly asks for a full header value.
+6. Set the health-check path to `/api/health` with expected status `200`. The WFM health route is public and confirms network reachability; the protected integration operation still checks the saved token.
+7. Save, test the connection, and activate it after the test succeeds.
+
+WFM JWT tokens expire after 12 hours. When the token expires and a connection test or integration returns `401`, repeat the PowerShell login request above and replace the saved token in **Hub → Connections → WFM connection → Edit**. Save and retest the connection. This credential update is made in the Hub; it does not require changing Vercel environment variables or redeploying the Hub. The demo credentials do not make the token permanent, and a longer-lived service credential is not currently implemented in the WFM code.
 
 ## Step 8: Configure a manual location integration
 
@@ -166,11 +178,11 @@ The Employee template follows the same one-record `records` array pattern. Its s
 | Symptom | What to check |
 | --- | --- |
 | Vercel deploys only the web app or says no matching framework | Confirm **Framework Preset = Services**, project root is the repository root, and the root `vercel.json` was included. |
-| `/` loads but `/api/health` fails | Check the `server` service build and Vercel runtime logs. Confirm `MONGODB_URI` and all required secrets exist in the Production environment. |
+| `/` loads but `/api/health` fails | Check the `server` service build and Vercel runtime logs. If the log mentions `Cannot use import statement outside a module` or `/var/task/src/app.js`, confirm the deployed `vercel.json` includes `"entrypoint": "api/index.ts"` for the server service, then redeploy the latest code. Also confirm `MONGODB_URI` and all required secrets exist in the Production environment. |
 | `/api/ready` says database unavailable | Verify Atlas cluster is running, the URI/password is correct, the Hub database user has `readWrite` on `kp_integration_hub`, and Atlas Network Access permits Vercel. |
 | Browser requests show `CORS_REJECTED` | Set `CORS_ORIGINS` to the exact Hub URL including `https://` and without a trailing slash, then redeploy. |
 | First admin login fails | Confirm `BOOTSTRAP_ADMIN_EMAIL` and `BOOTSTRAP_ADMIN_PASSWORD` were set before the first request and that the users collection was empty. Check server logs for bootstrap errors. |
-| Hub-to-WFM returns 401/403 | Refresh the WFM token, confirm it is an Administrator token for writes, update the Hub connection secret, and retest the connection. |
+| Hub-to-WFM returns 401/403 | Get a fresh WFM token using the PowerShell login steps in Step 7, update the saved token under **Hub → Connections → WFM connection → Edit**, save, and retest. The inbound write routes require an Administrator account. |
 | QA Agent says invalid key | Compare the Hub `QA_AGENT_API_KEY` with local `HUB_QA_AGENT_API_KEY` exactly, then restart the local Agent backend. |
 | A location/employee transfer returns per-record errors | Read the WFM response details. Check required fields, location codes, departments, job titles, employee IDs, and other referenced values against WFM. |
 | QA Agent finds no matching profile | Ensure the profile is enabled and its Integration ID exactly matches the Hub integration ID. |

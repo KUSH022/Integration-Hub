@@ -18,6 +18,7 @@ import TemplatesPage from './pages/TemplatesPage';
 import ApiDocsPage from './pages/ApiDocsPage';
 import AuditLogsPage from './pages/AuditLogsPage';
 import UsersPage from './pages/UsersPage';
+import HelpPage from './pages/HelpPage';
 
 const theme = createTheme({
   palette: { primary: { main: '#1554c0' }, secondary: { main: '#00796b' }, background: { default: '#f5f7fb' } },
@@ -52,6 +53,7 @@ function Protected() {
         <Route path="/api-docs" element={<ApiDocsPage />} />
         <Route path="/audit-logs" element={<AuditLogsPage />} />
         <Route path="/users" element={<UsersPage />} />
+        <Route path="/help" element={<HelpPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>

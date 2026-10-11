@@ -14,6 +14,7 @@ import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
 import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined';
 import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { useAuth } from '../auth';
 import type { Role } from '../api/types';
 
@@ -26,6 +27,7 @@ const NAV: Array<{ to: string; label: string; icon: ReactNode; role: Role }> = [
   { to: '/connections', label: 'Connections', icon: <CableOutlinedIcon />, role: 'VIEWER' },
   { to: '/templates', label: 'Templates', icon: <ContentCopyOutlinedIcon />, role: 'VIEWER' },
   { to: '/api-docs', label: 'API Documentation', icon: <MenuBookOutlinedIcon />, role: 'VIEWER' },
+  { to: '/help', label: 'Help', icon: <HelpOutlineIcon />, role: 'VIEWER' },
   { to: '/audit-logs', label: 'Audit Logs', icon: <ReceiptLongOutlinedIcon />, role: 'OPERATOR' },
   { to: '/users', label: 'Users', icon: <PeopleOutlineIcon />, role: 'ADMIN' },
 ];

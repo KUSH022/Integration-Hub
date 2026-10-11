@@ -141,6 +141,7 @@ export default function SourceDataPage() {
 
   const preview = parsed?.preview;
   const invalid = preview?.invalidCount ?? 0;
+  const batchSize = integration?.execution?.batchSize;
 
   return (
     <>
@@ -199,7 +200,7 @@ export default function SourceDataPage() {
           {integration && can('OPERATOR') && preview && (
             <Stack spacing={1} sx={{ mt: 1 }}>
               {!integration.active && <Alert severity="warning">The integration is inactive. Ask an administrator to activate it before executing.</Alert>}
-              {parsed.count > integration.execution.batchSize && <Alert severity="warning">{parsed.count} records exceed the integration batch size ({integration.execution.batchSize}).</Alert>}
+              {typeof batchSize === 'number' && parsed.count > batchSize && <Alert severity="warning">{parsed.count} records exceed the integration batch size ({batchSize}).</Alert>}
               {invalid > 0 && <FormControlLabel control={<Checkbox checked={ack} onChange={(e) => setAck(e.target.checked)} />} label={`I reviewed the errors — execute only the ${preview.validCount} valid record(s)`} />}
               <Box>
                 <Button variant="contained" disabled={busy || !integration.active || preview.validCount === 0 || (invalid > 0 && !ack)} onClick={() => void execute({ records: parsed.records, acknowledgeInvalid: ack })}>

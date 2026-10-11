@@ -130,9 +130,44 @@ export default function HelpPage() {
             <HelpSection number="8" title="Optionally run the local QA Agent check">
                 <ol>
                     <li>In the integration’s <strong>Execution settings</strong>, enable <strong>Allow manual QA Agent verification after a successful transfer</strong>, set comparison fields, and save the integration.</li>
-                    <li>Configure an enabled QA profile in the locally running Agent. Its Hub Integration ID must exactly match the ID shown on the Hub integration detail page.</li>
-                    <li>For WFM locations, the profile reads the record using <code>code: "{'{recordId}'}"</code>. For employees, it uses <code>employeeId: "{'{recordId}'}"</code>. The local Agent holds its own WFM read credential.</li>
-                    <li>After a successful Hub transfer, open the local Agent and manually click <strong>Get latest Hub run and compare</strong>. The Agent waits about one minute, reads that one WFM record, compares the expected values, and reports PASS/FAIL and discrepancies.</li>
+                    <li>Start the QA Agent backend and frontend on your computer, then open its local web page.</li>
+                    <li>In the Agent, open <strong>Integration Testing → Profiles</strong> and choose <strong>+ New profile</strong>.</li>
+                    <li>Fill in the profile fields. <strong>Profile ID</strong> is a name you choose for this Agent profile; <strong>Hub integration ID</strong> is copied from the Hub integration detail page and must match exactly. For a location profile, use a unique Profile ID (for example <code>wfm-locations</code>), a clear Name, <code>Location</code> as Entity type, <code>Integration Hub</code> as Source system, and <code>WFM</code> as Target system.</li>
+                    <li>For <strong>Verification config (JSON)</strong>, use the location configuration below. It tells the Agent to query WFM by the location code it receives from the Hub as <code>recordId</code>.</li>
+                </ol>
+                <Code>{`{
+  "target": {
+    "connection": "WFM",
+    "endpoint": "/api/integrations/outbound/locations",
+    "method": "GET",
+    "headers": {},
+    "query": { "code": "{recordId}", "page": 1, "limit": 1 },
+    "timeout": 15,
+    "expectedStatus": [200],
+    "responsePath": "records.0"
+  },
+  "auth": { "type": "bearer", "ref": "WFM" }
+}`}</Code>
+                <Typography variant="subtitle2">For an employee integration instead</Typography>
+                <Typography>Use <code>Employee</code> as Entity type and replace the target endpoint and query with the employee lookup shown here. Keep the WFM connection and bearer authentication reference.</Typography>
+                <Code>{`{
+  "target": {
+    "connection": "WFM",
+    "endpoint": "/api/integrations/outbound/employees",
+    "method": "GET",
+    "headers": {},
+    "query": { "employeeId": "{recordId}", "page": 1, "limit": 1 },
+    "timeout": 15,
+    "expectedStatus": [200],
+    "responsePath": "records.0"
+  },
+  "auth": { "type": "bearer", "ref": "WFM" }
+}`}</Code>
+                <ol start={6}>
+                    <li>In the Agent’s local <code>backend/.env</code>, set <code>CONN_WFM_URL</code> to the WFM base URL and <code>SECRET_WFM</code> to a WFM Manager or Administrator bearer token. Paste only the token value—do not add <code>Bearer </code>. Set <code>HUB_BASE_URL</code> to the Hub URL and make <code>HUB_QA_AGENT_API_KEY</code> match <code>QA_AGENT_API_KEY</code> in the Hub’s Vercel environment.</li>
+                    <li>Save the profile. New profiles are enabled by default; return to the profile list and confirm its <strong>Enabled</strong> value is <strong>Yes</strong>. Restart the local backend after changing its <code>.env</code> file.</li>
+                    <li>Run the integration manually in the Hub and wait for a successful transfer. In the local Agent, open <strong>Integration Testing → Hub check</strong> and click <strong>Get latest Hub run and compare</strong>.</li>
+                    <li>The Agent waits about one minute, reads only the matching WFM record, compares the Hub’s expected values, and displays PASS/FAIL with any differences. View the details under <strong>Integration Testing → Executions</strong>.</li>
                 </ol>
                 <Alert severity="info">The Hub does not start the local QA Agent. Enabling this option only makes successful runs available for a manual check; you still click the check button in the Agent.</Alert>
             </HelpSection>
